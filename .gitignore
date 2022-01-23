@@ -1,5 +1,5 @@
 # Secrets
-secrets.yml
+config.yml
 
 # Python distribution / packaging
 .Python
