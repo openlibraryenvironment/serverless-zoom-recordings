@@ -18,8 +18,15 @@ rec_compl_fifo_queue = sqs.Queue(os.environ["RECORDING_COMPLETE_FIFO_QUEUE"])
 
 
 def handler(event, context):
-    setup_logging(context)
+    setup_logging()
     log = structlog.get_logger()
+    aws_request_id = "*NO CONTEXT*"
+    if context is not None:
+        aws_request_id = context.aws_request_id
+
+    log = structlog.get_logger()
+    log = log.bind(aws_request_id=aws_request_id)
+
     log.info("STARTED", httpapi_event=event)
 
     # Did we get the anticipated authorization header value?

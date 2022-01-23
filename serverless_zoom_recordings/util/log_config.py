@@ -91,7 +91,7 @@ _PROCESSORS = (
 )
 
 
-def setup_logging(lambda_context):
+def setup_logging():
     """
     Configure logging for the application.
     """
@@ -115,11 +115,3 @@ def setup_logging(lambda_context):
     )
     for source in _NOISY_LOG_SOURCES:
         logging.getLogger(source).setLevel(logging.WARNING)
-
-    # Default bindings
-    aws_request_id = "*NO CONTEXT*"
-    if lambda_context is not None:
-        aws_request_id = lambda_context.aws_request_id
-
-    log = structlog.get_logger()
-    log = log.bind(aws_request_id=aws_request_id)
