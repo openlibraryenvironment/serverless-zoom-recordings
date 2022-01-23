@@ -1,0 +1,103 @@
+service: zoom-recordings
+frameworkVersion: '2 || 3'
+
+provider:
+  name: aws
+  runtime: python3.8
+  architecture: arm64
+  memorySize: 128
+  lambdaHashingVersion: '20201221'
+  region: ${opt:region, env:AWS_REGION, 'us-east-1'}
+  logRetentionInDays: ${opt:logretention, env:AWS_LOG_RETENTION, '14'}
+  httpApi:
+    useProviderTags: true
+    cors: true
+  tags:
+    Purpose: ${self:custom.stack_name}
+  deploymentBucket:
+    tags:
+      Purpose: ${self:service}
+
+  environment:
+    BASE_PATH: ${self:custom.config.BASE_PATH}
+    ZOOM_SECRET_TOKEN: "${self:custom.config.ZOOM_SECRET_TOKEN}"
+    MINIMUM_MEETING_DURATION: ${self:custom.config.MINIMUM_MEETING_DURATION}
+    RECORDING_COMPLETE_FIFO_QUEUE: !Ref RecordingCompleteQueue
+
+  iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - sqs:sendMessage
+          - sqs:ReceiveMessage
+          - sqs:DeleteMessage
+        Resource:
+          - !GetAtt
+            - RecordingCompleteQueue
+            - Arn
+
+custom:
+  default_stage: dev
+  stage: ${opt:stage, self:custom.default_stage}
+  stack_name: ${self:service}-${self:custom.stage}
+  bucket_prefix: org.openlibraryfoundation
+  # Store configuration and secrets in `config.yml`.  See
+  # http://www.goingserverless.com/blog/keeping-secrets-out-of-git
+  config: ${file(config.yml):${self:custom.stage}}
+
+  pythonRequirements:
+    pythonBin: .venv/bin/python
+    dockerizePip: false
+
+
+  # customDomain:
+  #   domainName: ${self:custom.config.HOSTNAME}
+  #   stage: ${self:custom.stage}
+  #   basePath: ${self:custom.config.BASE_PATH}
+  #   certificateName: ${self:custom.config.CERTIFICATE_NAME}
+  #   createRoute53Record: true
+  #   endpointType: 'regional'
+  #   securityPolicy: tls_1_2
+  #   apiType: http
+  #   autoDomain: false
+	
+  prune:
+    automatic: true
+    number: 3
+
+
+
+functions:
+  zoom_webhook:
+    handler: serverless_zoom_recordings.zoom_webhook.handler
+    events:
+      - httpApi:
+          path: /ingest/recording-completed
+          method: post
+
+# CloudFormation resource templates
+resources:
+  Resources:
+    RecordingCompleteQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        FifoQueue: true
+        QueueName: ${self:custom.stack_name}-RecordingComplete.fifo
+        ContentBasedDeduplication: true
+        Tags:
+          - Key: Purpose
+            Value: ${self:custom.stack_name}
+
+package:
+  include:
+    # - something
+  exclude:
+    - node_modules/**
+    - .venv/**
+    - env/**
+    - __pycache__
+    - config.yml
+
+plugins:
+  - serverless-python-requirements
+#  - serverless-domain-manager
+  - serverless-prune-plugin
