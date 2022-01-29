@@ -19,21 +19,12 @@ provider:
       Purpose: ${self:service}
 
   environment:
-    BASE_PATH: ${self:custom.config.BASE_PATH}
-    ZOOM_SECRET_TOKEN: "${self:custom.config.ZOOM_SECRET_TOKEN}"
-    MINIMUM_MEETING_DURATION: ${self:custom.config.MINIMUM_MEETING_DURATION}
-    RECORDING_COMPLETE_FIFO_QUEUE: !Ref RecordingCompleteQueue
+    DEPLOYMENT_STAGE: ${self:custom.stage}
 
-  iamRoleStatements:
-      - Effect: Allow
-        Action:
-          - sqs:sendMessage
-          - sqs:ReceiveMessage
-          - sqs:DeleteMessage
-        Resource:
-          - !GetAtt
-            - RecordingCompleteQueue
-            - Arn
+  # iamRoleStatements:
+        # - Effect: Allow
+        #   Action: states:StartExecution
+        #   Resource: !Ref IngestZoomRecordingStateMachine
 
 custom:
   default_stage: dev
@@ -71,33 +62,58 @@ functions:
     handler: serverless_zoom_recordings.zoom_webhook.handler
     events:
       - httpApi:
-          path: /ingest/recording-completed
+          path: /ingest/zoom_webhook
           method: post
+    environment:
+      BASE_PATH: ${self:custom.config.BASE_PATH}
+      ZOOM_SECRET_TOKEN: ${self:custom.config.ZOOM_SECRET_TOKEN}
+      MINIMUM_MEETING_DURATION: ${self:custom.config.MINIMUM_MEETING_DURATION}
+      INGEST_ZOOM_RECORDING_STEP_MACHINE: !Ref IngestZoomRecordingStateMachine
+    iamRoleStatements:
+      - Effect: Allow
+        Action: states:StartExecution
+        Resource: !Ref IngestZoomRecordingStateMachine
+
+  ingest_metadata:
+    handler: serverless_zoom_recordings.ingest_metadata.handler
+
+stepFunctions:
+  stateMachines:
+    ingestZoomRecording:
+      id: IngestZoomRecordingStateMachine
+      name: ingestZoomRecording-${self:custom.stage}
+      definition:
+        Comment: "Move recordings from Zoom to S3"
+        StartAt: IngestMetadata
+        States:
+          IngestMetadata:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [ingest_metadata, Arn]
+            End: true
 
 # CloudFormation resource templates
 resources:
-  Resources:
-    RecordingCompleteQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        FifoQueue: true
-        QueueName: ${self:custom.stack_name}-RecordingComplete.fifo
-        ContentBasedDeduplication: true
-        Tags:
-          - Key: Purpose
-            Value: ${self:custom.stack_name}
+  Description: Move Recordings from Zoom to S3 ${self:custom.stage} — Serverless.com CloudFormation template
+  # Resources:
 
 package:
   include:
     # - something
   exclude:
     - node_modules/**
+    - bin/nodeenv
+    - nodeenv*
     - .venv/**
     - env/**
     - __pycache__
     - config.yml
+    - sample-messages
+
 
 plugins:
   - serverless-python-requirements
 #  - serverless-domain-manager
   - serverless-prune-plugin
+  - serverless-step-functions
+  - serverless-iam-roles-per-function

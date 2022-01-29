@@ -1,0 +1,53 @@
+{
+  "payload": {
+    "account_id": "PleUVrpQTGeiEHQ27JSk9w",
+    "object": {
+      "uuid": "CnIDrQSsRdi9bWp3jyJsZQ==",
+      "id": 7816381929,
+      "account_id": "PleUVrpQTGeiEHQ27JSk9w",
+      "host_id": "OU54QJ6tRoGM55Rlt8YiQg",
+      "topic": "OLF Tech Coordinator's Personal Meeting Room",
+      "type": 4,
+      "start_time": "2022-01-23T15:31:56Z",
+      "timezone": "America/New_York",
+      "host_email": "olf_tech_coordinator@openlibraryfoundation.org",
+      "duration": 2,
+      "total_size": 4952686,
+      "recording_count": 2,
+      "share_url": "https://openlibraryfoundation.zoom.us/rec/share/G322ocUP0k6yLNSuIQ-R1cS0nFUTvFpwJiejr2PTgddYISsRyRG22_DwMHAcTlyQ.5RRJ38oL3l0YAS2q",
+      "recording_files": [
+        {
+          "id": "83ea5b26-2005-4d6f-9b6f-73e6db52488a",
+          "meeting_id": "CnIDrQSsRdi9bWp3jyJsZQ==",
+          "recording_start": "2022-01-23T15:32:05Z",
+          "recording_end": "2022-01-23T15:34:28Z",
+          "file_type": "M4A",
+          "file_extension": "M4A",
+          "file_size": 2183386,
+          "play_url": "https://openlibraryfoundation.zoom.us/rec/play/97ZqG3nwY-5QqjstPCq0_ec6-s92lq_OQfVNO5FvC_uoF_IZoslpA8pffCuXwuPTPuLeUCyOJTOK0GX_.wR-uaHn9eQCCPEuw",
+          "download_url": "https://openlibraryfoundation.zoom.us/rec/webhook_download/97ZqG3nwY-5QqjstPCq0_ec6-s92lq_OQfVNO5FvC_uoF_IZoslpA8pffCuXwuPTPuLeUCyOJTOK0GX_.wR-uaHn9eQCCPEuw/HPpR-RuoIlGcZKYbyHyka4BAWPRVbgCmur8ewDW1qSxUIJLpzuQUDWwjqHf9H0k.IrKf8_LPCxkkhP9s",
+          "status": "completed",
+          "recording_type": "audio_only"
+        },
+        {
+          "id": "5b1af583-bdd4-4bde-9cee-f53954302cbe",
+          "meeting_id": "CnIDrQSsRdi9bWp3jyJsZQ==",
+          "recording_start": "2022-01-23T15:32:05Z",
+          "recording_end": "2022-01-23T15:34:28Z",
+          "file_type": "MP4",
+          "file_extension": "MP4",
+          "file_size": 2769300,
+          "play_url": "https://openlibraryfoundation.zoom.us/rec/play/HjIOMciaVZGWx1gXOoBBoMeFrWZmUiCCFahYjGdkJu5h8XL__9G_zuHcu9HR-o9GsZ4cBvRav47wIjNP.RhaS4_CX0pmZcOla",
+          "download_url": "https://openlibraryfoundation.zoom.us/rec/webhook_download/HjIOMciaVZGWx1gXOoBBoMeFrWZmUiCCFahYjGdkJu5h8XL__9G_zuHcu9HR-o9GsZ4cBvRav47wIjNP.RhaS4_CX0pmZcOla/-BBFyIb6VWb9zRhPVLpx74IPAbmd9jjsgVDSNKV-mxyznGCF2Afm1SOf1rkx0kw.sLP095xyRYzq-RbP",
+          "status": "completed",
+          "recording_type": "shared_screen_with_speaker_view"
+        }
+      ],
+      "password": "+6gCkMFr",
+      "on_prem": false
+    }
+  },
+  "event_ts": 1642952104611,
+  "event": "recording.completed",
+  "download_token": "eyJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJodHRwczovL2V2ZW50Lnpvb20udXMiLCJhY2NvdW50SWQiOiJQbGVVVnJwUVRHZWlFSFEyN0pTazl3IiwiYXVkIjoiaHR0cHM6Ly9vYXV0aC56b29tLnVzIiwibWlkIjoiQ25JRHJRU3NSZGk5YldwM2p5SnNaUT09IiwiZXhwIjoxNjQzMDM4NTA0LCJ1c2VySWQiOiJPVTU0UUo2dFJvR001NVJsdDhZaVFnIn0.4fea3n9s08hnJAgYcBeWlTfahq5Lu42PhgC_7qfP6VL-YS--FgvOgQQZ3cn5oTC-pFGrneBWGoY8glRqhtRFdA"
+}
