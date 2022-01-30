@@ -16,7 +16,8 @@
 1. Invoke the Step Function
 
 ### Recording Intake
-1. Create S3 folder
-1. Get meeting metadata from Zoom, store in S3 folder and database
+1. Store recording details in S3 and database
+1. Get past meeting metadata from Zoom, store in S3 folder and database
+1. Get parent meeting metadata from Zoom, store in S3 folder and database
 1. Prepare parallel recording retrieval
 

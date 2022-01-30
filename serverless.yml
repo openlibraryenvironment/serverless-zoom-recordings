@@ -17,14 +17,22 @@ provider:
   deploymentBucket:
     tags:
       Purpose: ${self:service}
+  # iam:
+  #   role:
+  #     statments:	
 
   environment:
     DEPLOYMENT_STAGE: ${self:custom.stage}
 
-  # iamRoleStatements:
-        # - Effect: Allow
-        #   Action: states:StartExecution
-        #   Resource: !Ref IngestZoomRecordingStateMachine
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - 's3:ListBucket'
+      Resource: 'arn:aws:s3:::${self:custom.config.RECORDINGS_S3_BUCKET}'
+    - Effect: Allow
+      Action:
+        - 's3:PutObject'
+      Resource: 'arn:aws:s3:::${self:custom.config.RECORDINGS_S3_BUCKET}/*'
 
 custom:
   default_stage: dev
@@ -76,6 +84,10 @@ functions:
 
   ingest_metadata:
     handler: serverless_zoom_recordings.ingest_metadata.handler
+    environment: 
+      RECORDINGS_S3_BUCKET: ${self:custom.config.RECORDINGS_S3_BUCKET}
+      ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
+      ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
 
 stepFunctions:
   stateMachines:
@@ -108,7 +120,7 @@ package:
     - env/**
     - __pycache__
     - config.yml
-    - sample-messages
+    - sample-messages/**
 
 
 plugins:

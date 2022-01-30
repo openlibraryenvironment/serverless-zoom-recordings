@@ -8,7 +8,7 @@ def httpapi_response(
         {
             "statusCode": statusCode,
             "isBase64Encoded": isBase64Encoded,
-            "body": body,
+            "body": f"{body}\n",
             "headers": {"content-type": contentType},
         }
     )
