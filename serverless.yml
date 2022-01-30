@@ -28,11 +28,11 @@ provider:
     - Effect: Allow
       Action:
         - 's3:ListBucket'
-      Resource: 'arn:aws:s3:::${self:custom.config.RECORDINGS_S3_BUCKET}'
+      Resource: 'arn:aws:s3:::${self:custom.config.RECORDINGS_BUCKET}'
     - Effect: Allow
       Action:
         - 's3:PutObject'
-      Resource: 'arn:aws:s3:::${self:custom.config.RECORDINGS_S3_BUCKET}/*'
+      Resource: 'arn:aws:s3:::${self:custom.config.RECORDINGS_BUCKET}/*'
 
 custom:
   default_stage: dev
@@ -85,16 +85,14 @@ functions:
   ingest_metadata:
     handler: serverless_zoom_recordings.ingest_metadata.handler
     environment: 
-      RECORDINGS_S3_BUCKET: ${self:custom.config.RECORDINGS_S3_BUCKET}
+      RECORDINGS_BUCKET: ${self:custom.config.RECORDINGS_BUCKET}
       ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
       ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
 
   retrieve_recording:
     handler: serverless_zoom_recordings.retrieve_recording.handler
     environment: 
-      RECORDINGS_S3_BUCKET: ${self:custom.config.RECORDINGS_S3_BUCKET}
-      ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
-      ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
+      RECORDINGS_BUCKET: ${self:custom.config.RECORDINGS_BUCKET}
 
 stepFunctions:
   stateMachines:

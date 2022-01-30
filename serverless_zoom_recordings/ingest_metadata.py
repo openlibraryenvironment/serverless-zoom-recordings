@@ -11,7 +11,7 @@ from zoomus import ZoomClient
 from .util.log_config import setup_logging
 
 DEPLOYMENT_STAGE = os.environ["DEPLOYMENT_STAGE"]
-RECORDINGS_S3_BUCKET = os.environ["RECORDINGS_S3_BUCKET"]
+RECORDINGS_BUCKET = os.environ["RECORDINGS_BUCKET"]
 ZOOM_API_KEY = os.environ["ZOOM_API_KEY"]
 ZOOM_API_SECRET = os.environ["ZOOM_API_SECRET"]
 
@@ -44,7 +44,7 @@ def handler(sf_input, context):
     ##STAGE Store recording details in S3 and database
     stage = "Store recording details"
     recording_json_key = f"{recording_id}/recording.json"
-    s3_object = s3.Object(RECORDINGS_S3_BUCKET, recording_json_key)
+    s3_object = s3.Object(RECORDINGS_BUCKET, recording_json_key)
     response = s3_object.put(Body=json.dumps(sf_input), ContentType="application/json")
     log.debug(stage, reason="Put recording event details", response=response)
     sf_output["recording_metadata"] = sf_input
@@ -75,23 +75,40 @@ def handler(sf_input, context):
         recording_metadata = {
             "recording_type": recording["recording_type"],
             "download_url": recording["download_url"],
+            "zoom_file_id": recording["id"],
+            "zoom_meeting_id": recording["meeting_id"],
+            "zoom_parent_meeting_id": sf_output["parent_meeting_metadata"]["id"],
+            "zoom_parent_meeting_topic": sf_output["parent_meeting_metadata"]["topic"],
+            "zoom_parent_meeting_password": sf_output["parent_meeting_metadata"][
+                "password"
+            ],
+            "zoom_file_size": recording["file_size"],
+            "recording_start": recording["recording_start"],
+            "recording_end": recording["recording_end"],
             "download_token": download_token,
             "_recording_id": recording_id,
         }
         if recording["file_type"] == "M4A":
             recording_metadata["mime_type"] = "audio/m4a"
+            recording_metadata["extension"] = "m4a"
         elif recording["file_type"] == "MP4":
             recording_metadata["mime_type"] = "video/mp4"
+            recording_metadata["extension"] = "mp4"
         elif recording["file_type"] == "TIMELINE":
             recording_metadata["mime_type"] = "application/json"
+            recording_metadata["extension"] = "json"
         elif recording["file_type"] == "TRANSCRIPT":
             recording_metadata["mime_type"] = "text/vtt"
+            recording_metadata["extension"] = "vtt"
         elif recording["file_type"] == "CHAT":
             recording_metadata["mime_type"] = "text/plain"
+            recording_metadata["extension"] = "txt"
         elif recording["file_type"] == "CC":
             recording_metadata["mime_type"] = "text/vtt"
+            recording_metadata["extension"] = "vtt"
         elif recording["file_type"] == "CSV":
             recording_metadata["mime_type"] = "text/csv"
+            recording_metadata["extension"] = "csv"
         else:
             recording_metadata["mime_type"] = "application/octet-stream"
         sf_output["recordings_map_input"].append(recording_metadata)
@@ -121,7 +138,7 @@ def retrieve_zoom_metadata(
         raise RuntimeError(f"Retrieve Zoom meeting details failed: {reason}")
 
     if file_key:
-        s3_object = s3.Object(RECORDINGS_S3_BUCKET, file_key)
+        s3_object = s3.Object(RECORDINGS_BUCKET, file_key)
         response = s3_object.put(
             Body=json.dumps(api_content), ContentType="application/json"
         )

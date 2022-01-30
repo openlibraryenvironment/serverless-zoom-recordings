@@ -11,13 +11,33 @@
 
 ## Steps
 
-### Zoom Webhook
+### [Zoom Webhook](serverless_zoom_recordings/zoom_webhook.py)
 1. Accept the webhook message from Zoom, test for validity
 1. Invoke the Step Function
 
-### Recording Intake
+### [Recording Intake](serverless_zoom_recordings/ingest_metadata.py)
 1. Store recording details in S3 and database
 1. Get past meeting metadata from Zoom, store in S3 folder and database
 1. Get parent meeting metadata from Zoom, store in S3 folder and database
 1. Prepare parallel recording retrieval
 
+### [Retrieve Recording](serverless_zoom_recordings/retrieve_recording.py)
+1. Range-based retrieval from Zoom and put to S3 as multi-part upload
+1. Output file metadata in JSON
+
+### Clean-up
+1. Write retrieval JSON file
+1. Move Zoom recording to trash
+1. Create landing page for meeting
+1. Update group's events page and invalidate CloudFront cache
+
+## Other tasks
+
+### Retrieve missed meetings
+1. Scan through OLF accounts looking for missed meetings
+
+### Delete old recordings
+1. Search for meetings with disposition entries
+
+### Rebuild database
+1. Scan S3 bucket to rebuild event database 
