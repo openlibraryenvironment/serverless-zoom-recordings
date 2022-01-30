@@ -67,7 +67,36 @@ def handler(sf_input, context):
         log=log,
     )
 
-    ## Prepare parallel recording retrieval
+    ##STAGE Prepare parallel recording retrieval
+    stage = "Prepare recordings array"
+    download_token = sf_input["download_token"]
+    sf_output["recordings_map_input"] = []
+    for recording in sf_input["payload"]["object"]["recording_files"]:
+        recording_metadata = {
+            "recording_type": recording["recording_type"],
+            "download_url": recording["download_url"],
+            "download_token": download_token,
+            "_recording_id": recording_id,
+        }
+        if recording["file_type"] == "M4A":
+            recording_metadata["mime_type"] = "audio/m4a"
+        elif recording["file_type"] == "MP4":
+            recording_metadata["mime_type"] = "video/mp4"
+        elif recording["file_type"] == "TIMELINE":
+            recording_metadata["mime_type"] = "application/json"
+        elif recording["file_type"] == "TRANSCRIPT":
+            recording_metadata["mime_type"] = "text/vtt"
+        elif recording["file_type"] == "CHAT":
+            recording_metadata["mime_type"] = "text/plain"
+        elif recording["file_type"] == "CC":
+            recording_metadata["mime_type"] = "text/vtt"
+        elif recording["file_type"] == "CSV":
+            recording_metadata["mime_type"] = "text/csv"
+        else:
+            recording_metadata["mime_type"] = "application/octet-stream"
+        sf_output["recordings_map_input"].append(recording_metadata)
+        sf_output["recordings_map_results"] = []
+    log.info(stage, reason="Recordings", recordings=sf_output["recordings_map_input"])
 
     return sf_output
 

@@ -89,11 +89,23 @@ functions:
       ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
       ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
 
+  retrieve_recording:
+    handler: serverless_zoom_recordings.retrieve_recording.handler
+    environment: 
+      RECORDINGS_S3_BUCKET: ${self:custom.config.RECORDINGS_S3_BUCKET}
+      ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
+      ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
+
 stepFunctions:
   stateMachines:
     ingestZoomRecording:
       id: IngestZoomRecordingStateMachine
       name: ingestZoomRecording-${self:custom.stage}
+      loggingConfig:
+        level: ERROR
+        includeExecutionData: true
+        destinations:
+          - Fn::GetAtt: [ingestZoomRecordingsLog, Arn]
       definition:
         Comment: "Move recordings from Zoom to S3"
         StartAt: IngestMetadata
@@ -102,12 +114,33 @@ stepFunctions:
             Type: Task
             Resource:
               Fn::GetAtt: [ingest_metadata, Arn]
-            End: true
+            Next: RetrieveRecordingMap
+          RetrieveRecordingMap:
+            Type: Map
+            ItemsPath: "$.recordings_map_input"
+            ResultPath: "$.recordings_map_results"
+            MaxConcurrency: 5
+            Iterator:
+              StartAt: RetrieveRecording
+              States:
+                RetrieveRecording:
+                  Type: Task
+                  Resource:
+                    Fn::GetAtt: [retrieve_recording, Arn]
+                  End: true
+            Next: Success
+          Success:
+            Type: Succeed
 
 # CloudFormation resource templates
 resources:
   Description: Move Recordings from Zoom to S3 ${self:custom.stage} — Serverless.com CloudFormation template
-  # Resources:
+  Resources:
+    ingestZoomRecordingsLog:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: /aws/statefunction/${self:custom.stack_name}
+        RetentionInDays: ${self:provider.logRetentionInDays}
 
 package:
   include:
