@@ -9,6 +9,7 @@ import os
 import boto3
 import requests
 import structlog
+from botocore.exceptions import ClientError
 
 from .util.log_config import setup_logging
 
@@ -64,7 +65,11 @@ def handler(sf_input, context):
         chunk_size=CHUNK_SIZE,
         url=sf_input["download_url"],
     )
-    response = s3_client.create_multipart_upload(Bucket=RECORDINGS_BUCKET, Key=s3_key)
+    response = s3_client.create_multipart_upload(
+        Bucket=RECORDINGS_BUCKET,
+        Key=s3_key,
+        ContentType=sf_input["mime_type"],
+    )
     upload_id = response["UploadId"]
     log = log.bind(upload_id=upload_id)
     log.debug(stage, reason="Created multipart_upload", response=response)
@@ -102,12 +107,17 @@ def handler(sf_input, context):
     ##STAGE Complete multi-part upload
     stage = "Complete multi-part upload"
     log.debug(stage, reason="Completing", parts=parts)
-    response = s3_client.complete_multipart_upload(
-        Bucket=RECORDINGS_BUCKET,
-        Key=s3_key,
-        UploadId=upload_id,
-        MultipartUpload={"Parts": parts},
-    )
+    try:
+        response = s3_client.complete_multipart_upload(
+            Bucket=RECORDINGS_BUCKET,
+            Key=s3_key,
+            UploadId=upload_id,
+            MultipartUpload={"Parts": parts},
+        )
+    except ClientError as e:
+        log.error(stage, reason=e.response["Error"]["Code"], response=e.response)
+        raise RuntimeError from e
+
     log.debug(stage, reason="Completed", response=response)
     sf_output = {
         "location": response["Location"],
