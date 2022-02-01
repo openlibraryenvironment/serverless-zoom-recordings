@@ -68,6 +68,7 @@ custom:
 functions:
   zoom_webhook:
     handler: serverless_zoom_recordings.zoom_webhook.handler
+    timeout: 30
     events:
       - httpApi:
           path: /ingest/zoom_webhook
@@ -84,6 +85,7 @@ functions:
 
   ingest_metadata:
     handler: serverless_zoom_recordings.ingest_metadata.handler
+    timeout: 600
     environment: 
       RECORDINGS_BUCKET: ${self:custom.config.RECORDINGS_BUCKET}
       ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
@@ -91,6 +93,7 @@ functions:
 
   retrieve_recording:
     handler: serverless_zoom_recordings.retrieve_recording.handler
+    timeout: 600
     environment: 
       RECORDINGS_BUCKET: ${self:custom.config.RECORDINGS_BUCKET}
 
