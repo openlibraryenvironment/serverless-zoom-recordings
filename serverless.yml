@@ -17,9 +17,6 @@ provider:
   deploymentBucket:
     tags:
       Purpose: ${self:service}
-  # iam:
-  #   role:
-  #     statments:	
 
   environment:
     DEPLOYMENT_STAGE: ${self:custom.stage}
@@ -225,8 +222,22 @@ resources:
         QueueName: ${self:custom.stack_name}-webbuilder
         VisibilityTimeout: 30
 
-outputs:
-  notifyWebBuilder: !Ref notifyWebBuilder
+  Outputs:
+    MeetingsTable:
+      Description: The name of the "Meetings" document DynamoDB table
+      Value: !Ref meetingsTable
+      Export:
+        Name: ${self:custom.stack_name}:MeetingsTable
+    NotifyWebBuilderArn:
+      Description: The ARN for the "Notify Web Builder" Queue
+      Value: !GetAtt notifyWebBuilder.Arn
+      Export:
+        Name: ${self:custom.stack_name}:NotifyWebBuilderQueue
+    RecordingsBucket:
+      Description: The S3 Bucket name for the Zoom recordings storage
+      Value: ${self:custom.config.RECORDINGS_BUCKET}
+      Export:
+        Name: ${self:custom.stack_name}:RecordingsBucket
 
 package:
   include:
