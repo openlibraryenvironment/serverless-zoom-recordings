@@ -5,9 +5,10 @@
 1. `PIPENV_VENV_IN_PROJECT=1 pipenv install --dev`
 1. `pipenv shell` 
 1. `nodeenv -p` # Installs Node environment inside Python environment
-1. `npm install -g serverless` # Although the '-g' global flag is being used, Serverless install is in the Python/Node environment
-1. `rehash` # Pick up the serverless executable in the .venv/bin path
 1. `npm install --include=dev` # Installs Node packages inside combined Python/Node environment
+1. `exit` # For serverless to install correctly in the environment...
+1. `pipenv shell` # ...we need to exit out and re-enter the environment
+1. `npm install -g serverless` # Although the '-g' global flag is being used, Serverless install is in the Python/Node environment
 
 ## Steps
 
@@ -17,8 +18,8 @@
 
 ### [Recording Intake](serverless_zoom_recordings/ingest_metadata.py)
 1. Store recording details in S3 and database
-1. Get past meeting metadata from Zoom, store in S3 folder and database
-1. Get parent meeting metadata from Zoom, store in S3 folder and database
+1. Get past meeting metadata from Zoom, store in S3 folder
+1. Get parent meeting metadata from Zoom, store in S3 folder
 1. Prepare parallel recording retrieval
 
 ### [Retrieve Recording](serverless_zoom_recordings/retrieve_recording.py)
@@ -26,10 +27,9 @@
 1. Output file metadata in JSON
 
 ### Clean-up
-1. Write retrieval JSON file
+1. Write recording document to S3 and database
 1. Move Zoom recording to trash
-1. Create landing page for meeting
-1. Update group's events page and invalidate CloudFront cache
+1. Enqueue message to website builder
 
 ## Other tasks
 
