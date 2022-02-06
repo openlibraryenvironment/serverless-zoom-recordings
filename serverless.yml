@@ -68,7 +68,7 @@ custom:
 functions:
   zoom_webhook:
     handler: serverless_zoom_recordings.zoom_webhook.handler
-    timeout: 30
+    timeout: 10
     events:
       - httpApi:
           path: /ingest/zoom_webhook
@@ -96,6 +96,38 @@ functions:
     timeout: 600
     environment: 
       RECORDINGS_BUCKET: ${self:custom.config.RECORDINGS_BUCKET}
+    
+  finish_ingest:
+    handler: serverless_zoom_recordings.finish_ingest.handler
+    timeout: 600
+    environment: 
+      RECORDINGS_BUCKET: ${self:custom.config.RECORDINGS_BUCKET}
+      ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
+      ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
+      MEETINGS_DYNAMODB_TABLE: !Ref meetingsTable
+      NOTIFY_WEB_BUILDER_QUEUE: !Ref notifyWebBuilder
+    iamRoleStatementsInherit: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:Scan
+          - dynamodb:GetItem
+          - dynamodb:PutItem
+          - dynamodb:UpdateItem
+          - dynamodb:DeleteItem
+        Resource:
+          - !GetAtt
+            - meetingsTable
+            - Arn
+      - Effect: Allow
+        Action:
+          - sqs:sendMessage
+        Resource:
+          - !GetAtt
+            - notifyWebBuilder
+            - Arn
+
 
 stepFunctions:
   stateMachines:
@@ -129,6 +161,11 @@ stepFunctions:
                   Resource:
                     Fn::GetAtt: [retrieve_recording, Arn]
                   End: true
+            Next: FinishIngest
+          FinishIngest:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [finish_ingest, Arn]
             Next: Success
           Success:
             Type: Succeed
@@ -142,6 +179,54 @@ resources:
       Properties:
         LogGroupName: /aws/statefunction/${self:custom.stack_name}
         RetentionInDays: ${self:provider.logRetentionInDays}
+
+    meetingsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.stack_name}-meetings
+        AttributeDefinitions: 
+          - AttributeName: recording_id
+            AttributeType: S
+          - AttributeName: organization
+            AttributeType: S
+          - AttributeName: meeting_topic
+            AttributeType: S
+        BillingMode: PAY_PER_REQUEST
+        KeySchema:
+          - AttributeName: recording_id
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: organization-index
+            KeySchema:
+              - AttributeName: organization
+                KeyType: HASH
+            Projection:
+              ProjectionType: INCLUDE
+              NonKeyAttributes:
+                - meeting_id
+                - meeting_topic
+          - IndexName: meeting-index
+            KeySchema:
+              - AttributeName: meeting_topic
+                KeyType: HASH
+            Projection:
+              ProjectionType: INCLUDE
+              NonKeyAttributes:
+                - recording_path
+                - start_time
+        TableClass: STANDARD_INFREQUENT_ACCESS
+        Tags:
+          - Key: Purpose
+            Value: ${self:custom.stack_name}
+    
+    notifyWebBuilder:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.stack_name}-webbuilder
+        VisibilityTimeout: 30
+
+outputs:
+  notifyWebBuilder: !Ref notifyWebBuilder
 
 package:
   include:

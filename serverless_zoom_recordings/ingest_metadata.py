@@ -41,7 +41,7 @@ def handler(sf_input, context):
         raise RuntimeError("_recording_id not found in step function input")
     sf_output = {"_recording_id": recording_id}
 
-    ##STAGE Store recording details in S3 and database
+    ##STAGE Store recording details in S3
     stage = "Store recording details"
     recording_json_key = f"{recording_id}/recording.json"
     s3_object = s3.Object(RECORDINGS_BUCKET, recording_json_key)
@@ -49,7 +49,7 @@ def handler(sf_input, context):
     log.debug(stage, reason="Put recording event details", response=response)
     sf_output["recording_metadata"] = sf_input
 
-    ##STAGE Get past meeting metadata from Zoom, store in S3 folder and database
+    ##STAGE Get past meeting metadata from Zoom, store in S3 folder
     sf_output["past_meeting_metadata"] = retrieve_zoom_metadata(
         stage="Retrieve past meeting details",
         meeting_id=sf_input["payload"]["object"]["uuid"],
@@ -58,7 +58,7 @@ def handler(sf_input, context):
         log=log,
     )
 
-    ##STAGE Get parent meeting metadata from Zoom, store in S3 folder and database
+    ##STAGE Get parent meeting metadata from Zoom, store in S3 folder
     sf_output["parent_meeting_metadata"] = retrieve_zoom_metadata(
         stage="Retrieve parent meeting details",
         id=sf_output["past_meeting_metadata"]["id"],
