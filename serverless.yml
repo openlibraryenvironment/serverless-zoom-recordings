@@ -188,6 +188,8 @@ resources:
             AttributeType: S
           - AttributeName: meeting_topic
             AttributeType: S
+          - AttributeName: recording_path
+            AttributeType: S
         BillingMode: PAY_PER_REQUEST
         KeySchema:
           - AttributeName: recording_id
@@ -211,6 +213,14 @@ resources:
               NonKeyAttributes:
                 - recording_path
                 - start_time
+          - IndexName: path-index
+            KeySchema:
+              - AttributeName: recording_path
+                KeyType: HASH
+            Projection:
+              ProjectionType: INCLUDE
+              NonKeyAttributes:
+                - password
         TableClass: STANDARD_INFREQUENT_ACCESS
         Tags:
           - Key: Purpose
