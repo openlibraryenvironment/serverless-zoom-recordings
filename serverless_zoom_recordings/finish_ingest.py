@@ -107,25 +107,28 @@ def handler(sf_input, context):
 
     ##STAGE Delete recording from Zoom
     stage = "Delete recording from Zoom"
-    api_response = zoom_client.recording.delete(
-        meeting_id=sf_input["recording_metadata"]["payload"]["object"]["uuid"]
-    )
-    api_content = json.loads(api_response.content) if api_response.content else {}
-    if not api_response.ok:
-        reason = api_content["message"] if "message" in api_content else "unknown"
-        log.warning(
-            stage,
-            reason=reason,
-            response=api_response,
-            response_content=api_response.content,
+    if DEPLOYMENT_STAGE == "prod":
+        api_response = zoom_client.recording.delete(
+            meeting_id=sf_input["recording_metadata"]["payload"]["object"]["uuid"]
         )
+        api_content = json.loads(api_response.content) if api_response.content else {}
+        if not api_response.ok:
+            reason = api_content["message"] if "message" in api_content else "unknown"
+            log.warning(
+                stage,
+                reason=reason,
+                response=api_response,
+                response_content=api_response.content,
+            )
+        else:
+            log.debug(
+                stage,
+                reason="Deleted recording",
+                response=api_response,
+                response_content=api_response.content,
+            )
     else:
-        log.debug(
-            stage,
-            reason="Deleted recording",
-            response=api_response,
-            response_content=api_response.content,
-        )
+        log.info(stage, reason="Not in production deployment, recording not deleted")
 
     ##STAGE Send message to website builder routine
     stage = "Notify web-builder"
