@@ -21,6 +21,7 @@ zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET)
 
 
 def handler(sf_input, context):
+    """Handle event"""
     setup_logging()
     log = structlog.get_logger()
     aws_request_id = context.aws_request_id if context is not None else "*NO CONTEXT*"
@@ -121,6 +122,7 @@ def handler(sf_input, context):
 def retrieve_zoom_metadata(
     stage=None, zoom_api=None, file_key=None, log=None, **attributes
 ):
+    """General function to retrieve metadata from various Zoom endpoints."""
     if "id" in attributes:
         api_response = zoom_api(id=attributes["id"])
     elif "meeting_id" in attributes:

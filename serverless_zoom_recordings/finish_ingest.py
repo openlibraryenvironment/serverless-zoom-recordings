@@ -9,6 +9,7 @@ import boto3
 import structlog
 from zoomus import ZoomClient
 
+from .util.identifiers import parse_organization
 from .util.log_config import setup_logging
 from .util.recording_path import recording_path
 
@@ -30,6 +31,7 @@ zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET)
 
 
 def handler(sf_input, context):
+    """Handle Step Function"""
     setup_logging()
     log = structlog.get_logger()
     aws_request_id = context.aws_request_id if context is not None else "*NO CONTEXT*"
@@ -52,18 +54,7 @@ def handler(sf_input, context):
 
     ##STAGE Save recording document
     stage = "Save recording document"
-    if "OLF" in sf_input["parent_meeting_metadata"]["topic"]:
-        organization = "OLF"
-    elif "Foundation" in sf_input["parent_meeting_metadata"]["topic"]:
-        organization = "OLF"
-    elif "FOLIO" in sf_input["parent_meeting_metadata"]["topic"]:
-        organization = "FOLIO"
-    elif "ReShare" in sf_input["parent_meeting_metadata"]["topic"]:
-        organization = "ReShare"
-    elif "VuFind" in sf_input["parent_meeting_metadata"]["topic"]:
-        organization = "VuFind"
-    else:
-        organization = "other"
+    organization = parse_organization(sf_input["parent_meeting_metadata"]["topic"])
 
     path = recording_path(
         organization=organization,

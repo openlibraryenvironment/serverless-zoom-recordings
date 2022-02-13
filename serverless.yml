@@ -14,6 +14,8 @@ provider:
     cors: true
   tags:
     Purpose: ${self:custom.stack_name}
+  stackTags:
+    Purpose: ${self:custom.stack_name}
   deploymentBucket:
     tags:
       Purpose: ${self:service}
@@ -24,11 +26,12 @@ provider:
   iamRoleStatements:
     - Effect: Allow
       Action:
-        - 's3:ListBucket'
+        - s3:ListBucket
       Resource: 'arn:aws:s3:::${self:custom.config.RECORDINGS_BUCKET}'
     - Effect: Allow
       Action:
-        - 's3:PutObject'
+        - s3:PutObject
+        - s3:PutObjectTagging
       Resource: 'arn:aws:s3:::${self:custom.config.RECORDINGS_BUCKET}/*'
 
 custom:
@@ -45,16 +48,16 @@ custom:
     dockerizePip: false
 
 
-  # customDomain:
-  #   domainName: ${self:custom.config.HOSTNAME}
-  #   stage: ${self:custom.stage}
-  #   basePath: ${self:custom.config.BASE_PATH}
-  #   certificateName: ${self:custom.config.CERTIFICATE_NAME}
-  #   createRoute53Record: true
-  #   endpointType: 'regional'
-  #   securityPolicy: tls_1_2
-  #   apiType: http
-  #   autoDomain: false
+  customDomain:
+    domainName: ${self:custom.config.HOSTNAME}
+    stage: ${self:custom.stage}
+    basePath: ${self:custom.config.BASE_PATH}
+    certificateName: ${self:custom.config.CERTIFICATE_NAME}
+    createRoute53Record: true
+    endpointType: 'regional'
+    securityPolicy: tls_1_2
+    apiType: http
+    autoDomain: false
 	
   prune:
     automatic: true
@@ -124,6 +127,21 @@ functions:
           - !GetAtt
             - notifyWebBuilder
             - Arn
+
+  sweep_recordings:
+    handler: serverless_zoom_recordings.sweep_recordings.handler
+    timeout: 600
+    events:
+      - schedule: cron(0 7 * * ? *)
+    iamRoleStatements:
+      - Effect: Allow
+        Action: states:StartExecution
+        Resource: !Ref IngestZoomRecordingStateMachine
+    environment:
+      ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
+      ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
+      MINIMUM_MEETING_DURATION: ${self:custom.config.MINIMUM_MEETING_DURATION}
+      INGEST_ZOOM_RECORDING_STEP_MACHINE: !Ref IngestZoomRecordingStateMachine
 
 
 stepFunctions:

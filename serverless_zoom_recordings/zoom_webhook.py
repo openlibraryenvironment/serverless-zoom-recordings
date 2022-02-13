@@ -11,6 +11,7 @@ import structlog
 from botocore.exceptions import ClientError
 
 from .util.httpapi_helpers import httpapi_response
+from .util.identifiers import base64_to_uuid
 from .util.log_config import setup_logging
 
 DEPLOYMENT_STAGE = os.environ["DEPLOYMENT_STAGE"]
@@ -23,6 +24,7 @@ stepfunction_client = boto3.client("stepfunctions")
 
 
 def handler(event, context):
+    """Handle Zoom recording completed webhook event"""
     setup_logging()
     log = structlog.get_logger()
     aws_request_id = "*NO CONTEXT*"
@@ -75,12 +77,9 @@ def handler(event, context):
 
     ##STAGE Invoke step function with recording details
     stage = "Invoke step function"
-
-    meeting_uuid = body["payload"]["object"]["uuid"]
-    body["_recording_id"] = aws_request_id
-    unique_invocation_name = aws_request_id
-    if DEPLOYMENT_STAGE == "dev":
-        unique_invocation_name = f"{unique_invocation_name}-DEV-{time.time()}"
+    meeting_uuid = base64_to_uuid(body["payload"]["object"]["uuid"])
+    body["_recording_id"] = meeting_uuid
+    unique_invocation_name = f"{meeting_uuid}-{time.time()}"
 
     try:
         response = stepfunction_client.start_execution(
@@ -89,11 +88,11 @@ def handler(event, context):
             input=json.dumps(body),
             traceHeader=aws_request_id,
         )
-    except ClientError as e:
-        log.error(stage, reason=e.response["Error"]["Code"], response=e.response)
+    except ClientError as ex:
+        log.error(stage, reason=ex.response["Error"]["Code"], response=ex.response)
         return httpapi_response(
             statusCode=500,
-            body=f"AWS Client Error: {e.response['Error']['Message']}",
+            body=f"AWS Client Error: {ex.response['Error']['Message']}",
         )
 
     log.info(

@@ -11,6 +11,7 @@ import requests
 import structlog
 from botocore.exceptions import ClientError
 
+from .util.identifiers import parse_organization
 from .util.log_config import setup_logging
 
 DEPLOYMENT_STAGE = os.environ["DEPLOYMENT_STAGE"]
@@ -25,6 +26,7 @@ def handler(sf_input, context):
     """
     Expected keys in the sf_input dictionary to retrieve recording file. (Other
     keys may be present and are copied to the JSON metadata for each retrieved file.)
+        * zoom_parent_meeting_topic
         * recording_type
         * extension
         * download_url
@@ -69,6 +71,7 @@ def handler(sf_input, context):
         Bucket=RECORDINGS_BUCKET,
         Key=s3_key,
         ContentType=sf_input["mime_type"],
+        Tagging=f"Purpose=recording-site-{parse_organization(sf_input['zoom_parent_meeting_topic'])}",
     )
     upload_id = response["UploadId"]
     log = log.bind(upload_id=upload_id)
@@ -114,9 +117,9 @@ def handler(sf_input, context):
             UploadId=upload_id,
             MultipartUpload={"Parts": parts},
         )
-    except ClientError as e:
-        log.error(stage, reason=e.response["Error"]["Code"], response=e.response)
-        raise RuntimeError from e
+    except ClientError as ex:
+        log.error(stage, reason=ex.response["Error"]["Code"], response=ex.response)
+        raise RuntimeError from ex
 
     log.debug(stage, reason="Completed", response=response)
     sf_output = {
@@ -128,7 +131,11 @@ def handler(sf_input, context):
 
     metadata_key = f"{sf_input['_recording_id']}/{sf_input['recording_type']}.json"
     s3_object = s3.Object(RECORDINGS_BUCKET, metadata_key)
-    response = s3_object.put(Body=json.dumps(sf_output), ContentType="application/json")
+    response = s3_object.put(
+        Body=json.dumps(sf_output),
+        ContentType="application/json",
+        Tagging=f"Purpose=recording-site-{parse_organization(sf_input['zoom_parent_meeting_topic'])}",
+    )
     log.debug(stage, reason="Put file metadata", response=response)
 
     return sf_output
