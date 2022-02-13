@@ -47,7 +47,6 @@ custom:
     pythonBin: .venv/bin/python
     dockerizePip: false
 
-
   customDomain:
     domainName: ${self:custom.config.HOSTNAME}
     stage: ${self:custom.stage}
@@ -283,7 +282,7 @@ package:
 
 plugins:
   - serverless-python-requirements
-#  - serverless-domain-manager
+  - serverless-domain-manager
   - serverless-prune-plugin
   - serverless-step-functions
   - serverless-iam-roles-per-function

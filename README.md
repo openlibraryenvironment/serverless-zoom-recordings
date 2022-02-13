@@ -1,6 +1,6 @@
 # Serverless Infrastructure for Handling Zoom Meeting Recordings
 
-## Set up environment
+## Set up environment for development
 1. `cd serverless-zoom-recordings`
 1. `PIPENV_VENV_IN_PROJECT=1 pipenv install --dev`
 1. `pipenv shell` 
@@ -9,6 +9,9 @@
 1. `exit` # For serverless to install correctly in the environment...
 1. `pipenv shell` # ...we need to exit out and re-enter the environment
 1. `npm install -g serverless` # Although the '-g' global flag is being used, Serverless install is in the Python/Node environment
+
+## Before deploying the production stack
+1. `serverless create_domain --aws-profile olf`
 
 ## Steps
 
