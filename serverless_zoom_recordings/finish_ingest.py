@@ -126,6 +126,6 @@ def handler(sf_input, context):
     response = web_builder_notify.send_message(
         MessageBody=json.dumps(recording_document)
     )
-    log.debug(stage, reason="Notified web builder", response=response)
+    log.info(stage, reason="Complete", response=response, body=recording_document)
 
     return sf_output

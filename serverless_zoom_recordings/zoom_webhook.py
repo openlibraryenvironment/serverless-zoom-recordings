@@ -71,7 +71,7 @@ def handler(event, context):
     # Was the event long enough to save in the archive?
     meeting_duration = body["payload"]["object"]["duration"]
     if int(meeting_duration) < int(MINIMUM_MEETING_DURATION):
-        detail = f"Recording ignored; only {meeting_duration} seconds long"
+        detail = f"Recording ignored; only {meeting_duration} minutes long"
         log.warning(stage, reason="POST rejected", detail=detail)
         return httpapi_response(statusCode=200, body=detail)
 

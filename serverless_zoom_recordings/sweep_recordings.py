@@ -91,8 +91,9 @@ def handler(event, context):
             # Was the event long enough to save in the archive?
             meeting_duration = meeting["duration"]
             if int(meeting_duration) < int(MINIMUM_MEETING_DURATION):
-                detail = f"Recording ignored; only {meeting_duration} seconds long"
+                detail = f"Recording ignored; only {meeting_duration} minutes long"
                 log.warning(stage, reason="POST rejected", detail=detail)
+                break
 
             meeting_uuid = base64_to_uuid(meeting["uuid"])
             body = {
