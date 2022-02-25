@@ -93,7 +93,7 @@ def handler(event, context):
             if int(meeting_duration) < int(MINIMUM_MEETING_DURATION):
                 detail = f"Recording ignored; only {meeting_duration} minutes long"
                 log.warning(stage, reason="POST rejected", detail=detail)
-                break
+                continue
 
             meeting_uuid = base64_to_uuid(meeting["uuid"])
             body = {
