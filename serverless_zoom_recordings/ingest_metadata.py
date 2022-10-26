@@ -96,8 +96,8 @@ def handler(sf_input, context):
             recording_metadata["mime_type"] = "video/mp4"
             recording_metadata["extension"] = "mp4"
         elif recording["file_type"] == "TIMELINE":
-            recording_metadata["mime_type"] = "application/json"
-            recording_metadata["extension"] = "json"
+            recording_metadata["mime_type"] = "text/vtt"
+            recording_metadata["extension"] = "vtt"
         elif recording["file_type"] == "TRANSCRIPT":
             recording_metadata["mime_type"] = "text/vtt"
             recording_metadata["extension"] = "vtt"
