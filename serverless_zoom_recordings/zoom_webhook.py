@@ -1,26 +1,24 @@
 """
 Handle a "Recording Completed" webhook from Zoom.
+
+If the webhook has the correct metadata, call the `invoke_stepfunction` lambda.
 """
 import json
 import os
-import time
 from base64 import b64decode
 
 import boto3
 import structlog
-from botocore.exceptions import ClientError
 
 from .util.httpapi_helpers import httpapi_response
-from .util.identifiers import base64_to_uuid
 from .util.log_config import setup_logging
 
 DEPLOYMENT_STAGE = os.environ["DEPLOYMENT_STAGE"]
 BASE_PATH = os.environ["BASE_PATH"]
 ZOOM_SECRET_TOKEN = os.environ["ZOOM_SECRET_TOKEN"]
-MINIMUM_MEETING_DURATION = os.environ["MINIMUM_MEETING_DURATION"]
-STEP_FUNCTION = os.environ["INGEST_ZOOM_RECORDING_STEP_MACHINE"]
+INVOKE_STEPFUNCTION_ARN = os.environ["INVOKE_STEPFUNCTION_ARN"]
 
-stepfunction_client = boto3.client("stepfunctions")
+lambda_client = boto3.client("lambda")
 
 
 def handler(event, context):
@@ -68,40 +66,19 @@ def handler(event, context):
         log.error(stage, reason="POST rejected", detail=detail)
         return httpapi_response(statusCode=400, body=detail)
 
-    # Was the event long enough to save in the archive?
-    meeting_duration = body["payload"]["object"]["duration"]
-    if int(meeting_duration) < int(MINIMUM_MEETING_DURATION):
-        detail = f"Recording ignored; only {meeting_duration} minutes long"
-        log.warning(stage, reason="POST rejected", detail=detail)
-        return httpapi_response(statusCode=200, body=detail)
+    ## STAGE Call invoke_stepfunction lambda
+    stage = "Call invoke_stepfunction lambda"
 
-    ##STAGE Invoke step function with recording details
-    stage = "Invoke step function"
-    meeting_uuid = base64_to_uuid(body["payload"]["object"]["uuid"])
-    body["_recording_id"] = meeting_uuid
-    unique_invocation_name = f"{meeting_uuid}-{time.time()}"
-
-    try:
-        response = stepfunction_client.start_execution(
-            stateMachineArn=STEP_FUNCTION,
-            name=f"{DEPLOYMENT_STAGE}-{unique_invocation_name}",
-            input=json.dumps(body),
-            traceHeader=aws_request_id,
-        )
-    except ClientError as ex:
-        log.error(stage, reason=ex.response["Error"]["Code"], response=ex.response)
-        return httpapi_response(
-            statusCode=500,
-            body=f"AWS Client Error: {ex.response['Error']['Message']}",
-        )
-
-    log.info(
+    log.debug(
         stage,
-        reason="Started step function",
-        response=response,
-        meeting_uuid=meeting_uuid,
+        reason="Calling lambda",
+        detail={"FunctionName": INVOKE_STEPFUNCTION_ARN},
+        body=body,
     )
-    return httpapi_response(
-        statusCode=200,
-        body=f"Step function Started: {response['ResponseMetadata']['RequestId']}",
+    lambda_response = lambda_client.invoke(
+        FunctionName=INVOKE_STEPFUNCTION_ARN,
+        InvocationType="RequestResponse",
+        LogType="Tail",
+        Payload=json.dumps(body),
     )
+    log.info(stage, reason="Call completed", detail=lambda_response)

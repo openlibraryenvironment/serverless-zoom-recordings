@@ -3,12 +3,10 @@ Ingest metadata into S3 and DynamoDB
 """
 import json
 import os
-import time
 from datetime import datetime
 
 import boto3
 import structlog
-from botocore.exceptions import ClientError
 from dateutil.relativedelta import relativedelta
 from zoomus import ZoomClient
 
@@ -18,12 +16,11 @@ from .util.log_config import setup_logging
 DEPLOYMENT_STAGE = os.environ["DEPLOYMENT_STAGE"]
 ZOOM_API_KEY = os.environ["ZOOM_API_KEY"]
 ZOOM_API_SECRET = os.environ["ZOOM_API_SECRET"]
-MINIMUM_MEETING_DURATION = os.environ["MINIMUM_MEETING_DURATION"]
-STEP_FUNCTION = os.environ["INGEST_ZOOM_RECORDING_STEP_MACHINE"]
+INVOKE_STEPFUNCTION_ARN = os.environ["INVOKE_STEPFUNCTION_ARN"]
 
-
-zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET)
+lambda_client = boto3.client("lambda")
 stepfunction_client = boto3.client("stepfunctions")
+zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET)
 
 
 def handler(event, context):
@@ -88,13 +85,6 @@ def handler(event, context):
         ##STAGE Loop through recordings
         stage = "Loop through recordings"
         for meeting in api_content["meetings"]:
-            # Was the event long enough to save in the archive?
-            meeting_duration = meeting["duration"]
-            if int(meeting_duration) < int(MINIMUM_MEETING_DURATION):
-                detail = f"Recording ignored; only {meeting_duration} minutes long"
-                log.warning(stage, reason="POST rejected", detail=detail)
-                continue
-
             meeting_uuid = base64_to_uuid(meeting["uuid"])
             body = {
                 "payload": {
@@ -103,27 +93,17 @@ def handler(event, context):
                 "_recording_id": meeting_uuid,
                 "download_token": zoom_client.config["token"],
             }
-            unique_invocation_name = f"{meeting_uuid}-{time.time()}"
 
-            log.debug(stage, reason="Calling stepfunction", body=body)
-            try:
-                response = stepfunction_client.start_execution(
-                    stateMachineArn=STEP_FUNCTION,
-                    name=f"{DEPLOYMENT_STAGE}-{unique_invocation_name}",
-                    input=json.dumps(body),
-                    traceHeader=meeting_uuid,
-                )
-            except ClientError as ex:
-                log.error(
-                    stage,
-                    reason=ex.response["Error"]["Code"],
-                    response=ex.response,
-                    body=body,
-                )
-
-            log.info(
+            log.debug(
                 stage,
-                reason="Started step function",
-                response=response,
-                meeting_uuid=meeting_uuid,
+                reason="Calling lambda",
+                detail={"FunctionName": INVOKE_STEPFUNCTION_ARN},
+                body=body,
             )
+            lambda_response = lambda_client.invoke(
+                FunctionName=INVOKE_STEPFUNCTION_ARN,
+                InvocationType="RequestResponse",
+                LogType="Tail",
+                Payload=json.dumps(body),
+            )
+            log.info(stage, reason="Call completed", detail=lambda_response)
