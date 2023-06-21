@@ -44,3 +44,7 @@
 
 ### Rebuild database
 1. Scan S3 bucket to rebuild event database 
+
+### Modify meeting recording document
+1. Download the `meeting_recording.json` document and modify to taste
+2. Invoke the *reindex_recording* endpoint: `sls invoke --stage prod --aws-profile olf --function reindex_recording --path ~/Downloads/recording_document.json`
