@@ -48,3 +48,7 @@
 ### Modify meeting recording document
 1. Download the `meeting_recording.json` document and modify to taste
 2. Invoke the *reindex_recording* endpoint: `sls invoke --stage prod --aws-profile olf --function reindex_recording --path ~/Downloads/recording_document.json`
+
+### Manually ingest a recording from Zoom
+1. Retrieve the JSON of the Zoom webhook. (For example, go into the StepFunction execution and pull the JSON from there, then edit to needs.)
+1. Invoke the *invoke_stepfunction* endpoint: `sls invoke --aws-profile olf --stage prod --function invoke_stepfunction --path zoom_webhook.json`

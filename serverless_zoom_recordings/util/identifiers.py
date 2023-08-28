@@ -33,6 +33,10 @@ def parse_organization(meeting_topic):
         organization = "ReShare"
     elif "VuFind" in meeting_topic:
         organization = "VuFind"
+    elif "LDP" in meeting_topic:
+        organization = "LDP"
+    elif "OpenRS" in meeting_topic:
+        organization = "OpenRS"
     else:
         organization = "other"
 
