@@ -74,7 +74,7 @@ functions:
           method: post
     environment:
       BASE_PATH: ${self:custom.config.BASE_PATH}
-      ZOOM_SECRET_TOKEN: ${self:custom.config.ZOOM_SECRET_TOKEN}
+      ZOOM_WEBHOOK_SECRET_TOKEN: ${self:custom.config.ZOOM_WEBHOOK_SECRET_TOKEN}
       INVOKE_STEPFUNCTION_ARN: !Ref InvokeUnderscorestepfunctionLambdaFunction
     iamRoleStatements:
       - Effect: Allow
