@@ -5,10 +5,11 @@ name = "pypi"
 
 [packages]
 nodeenv = "*"
-structlog = "*"
+structlog = "==22.1.0"
 orjson = "*"
 zoomus = "*"
 pytz = "*"
+urllib3 = "==1.26.6"
 
 [dev-packages]
 black = "*"

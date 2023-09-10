@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "81b730f4b0de28b72904735776ca9de77596fe57658838f47973e2fd64c4aed9"
+            "sha256": "c3cd5da13673432b6f46dddecf09f0cb449906616e1f4d005b2889fb40b67afe"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -213,19 +213,19 @@
         },
         "structlog": {
             "hashes": [
-                "sha256:270d681dd7d163c11ba500bc914b2472d2b50a8ef00faa999ded5ff83a2f906b",
-                "sha256:79b9e68e48b54e373441e130fa447944e6f87a05b35de23138e475c05d0f7e0e"
+                "sha256:760d37b8839bd4fe1747bed7b80f7f4de160078405f4b6a1db9270ccbfce6c30",
+                "sha256:94b29b1d62b2659db154f67a9379ec1770183933d6115d21f21aa25cfc9a7393"
             ],
             "index": "pypi",
-            "version": "==23.1.0"
+            "version": "==22.1.0"
         },
         "urllib3": {
             "hashes": [
-                "sha256:8d22f86aae8ef5e410d4f539fde9ce6b2113a001bb4d189e0aed70642d602b11",
-                "sha256:de7df1803967d2c2a98e4b11bb7d6bd9210474c46e8a0401514e3a42a75ebde4"
+                "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4",
+                "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"
             ],
-            "markers": "python_version >= '3.7'",
-            "version": "==2.0.4"
+            "index": "pypi",
+            "version": "==1.26.6"
         },
         "zoomus": {
             "hashes": [
@@ -441,11 +441,11 @@
         },
         "urllib3": {
             "hashes": [
-                "sha256:8d22f86aae8ef5e410d4f539fde9ce6b2113a001bb4d189e0aed70642d602b11",
-                "sha256:de7df1803967d2c2a98e4b11bb7d6bd9210474c46e8a0401514e3a42a75ebde4"
+                "sha256:39fb8672126159acb139a7718dd10806104dec1e2f0f6c88aab05d17df10c8d4",
+                "sha256:f57b4c16c62fa2760b7e3d97c35b255512fb6b59a259730f36ba32ce9f8e342f"
             ],
-            "markers": "python_version >= '3.7'",
-            "version": "==2.0.4"
+            "index": "pypi",
+            "version": "==1.26.6"
         },
         "wrapt": {
             "hashes": [
