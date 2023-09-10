@@ -19,10 +19,11 @@ BASE_PATH = os.environ["BASE_PATH"]
 MINIMUM_MEETING_DURATION = os.environ["MINIMUM_MEETING_DURATION"]
 ZOOM_API_KEY = os.environ["ZOOM_API_KEY"]
 ZOOM_API_SECRET = os.environ["ZOOM_API_SECRET"]
+ZOOM_ACCOUNT_ID = os.environ["ZOOM_ACCOUNT_ID"]
 STEP_FUNCTION = os.environ["INGEST_ZOOM_RECORDING_STEP_MACHINE"]
 
 stepfunction_client = boto3.client("stepfunctions")
-zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET)
+zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET, ZOOM_ACCOUNT_ID)
 
 
 def handler(event, context):

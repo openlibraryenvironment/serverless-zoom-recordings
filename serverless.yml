@@ -89,6 +89,7 @@ functions:
       MINIMUM_MEETING_DURATION: ${self:custom.config.MINIMUM_MEETING_DURATION}
       ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
       ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
+      ZOOM_ACCOUNT_ID: ${self:custom.config.ZOOM_ACCOUNT_ID}
       INGEST_ZOOM_RECORDING_STEP_MACHINE: !Ref IngestZoomRecordingStateMachine
     iamRoleStatements:
       - Effect: Allow
@@ -102,6 +103,7 @@ functions:
       RECORDINGS_BUCKET: ${self:custom.config.RECORDINGS_BUCKET}
       ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
       ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
+      ZOOM_ACCOUNT_ID: ${self:custom.config.ZOOM_ACCOUNT_ID}
 
   retrieve_recording:
     handler: serverless_zoom_recordings.retrieve_recording.handler
@@ -116,6 +118,7 @@ functions:
       RECORDINGS_BUCKET: ${self:custom.config.RECORDINGS_BUCKET}
       ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
       ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
+      ZOOM_ACCOUNT_ID: ${self:custom.config.ZOOM_ACCOUNT_ID}
       MEETINGS_DYNAMODB_TABLE: !Ref meetingsTable
       NOTIFY_WEB_BUILDER_QUEUE: !Ref notifyWebBuilder
     iamRoleStatementsInherit: true
@@ -178,6 +181,7 @@ functions:
       BASE_PATH: ${self:custom.config.BASE_PATH}
       ZOOM_API_KEY: ${self:custom.config.ZOOM_API_KEY}
       ZOOM_API_SECRET: ${self:custom.config.ZOOM_API_SECRET}
+      ZOOM_ACCOUNT_ID: ${self:custom.config.ZOOM_ACCOUNT_ID}
       INVOKE_STEPFUNCTION_ARN: !Ref InvokeUnderscorestepfunctionLambdaFunction
     iamRoleStatements:
       - Effect: Allow

@@ -17,6 +17,7 @@ DEPLOYMENT_STAGE = os.environ["DEPLOYMENT_STAGE"]
 RECORDINGS_BUCKET = os.environ["RECORDINGS_BUCKET"]
 ZOOM_API_KEY = os.environ["ZOOM_API_KEY"]
 ZOOM_API_SECRET = os.environ["ZOOM_API_SECRET"]
+ZOOM_ACCOUNT_ID = os.environ["ZOOM_ACCOUNT_ID"]
 MEETINGS_DYNAMODB_TABLE = os.environ["MEETINGS_DYNAMODB_TABLE"]
 NOTIFY_WEB_BUILDER_QUEUE = os.environ["NOTIFY_WEB_BUILDER_QUEUE"]
 
@@ -27,7 +28,7 @@ meetings_table = dynamodb.Table(MEETINGS_DYNAMODB_TABLE)
 sqs = boto3.resource("sqs")
 web_builder_notify = sqs.Queue(NOTIFY_WEB_BUILDER_QUEUE)
 
-zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET)
+zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET, ZOOM_ACCOUNT_ID)
 
 
 def handler(sf_input, context):

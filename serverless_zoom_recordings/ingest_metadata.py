@@ -14,10 +14,11 @@ DEPLOYMENT_STAGE = os.environ["DEPLOYMENT_STAGE"]
 RECORDINGS_BUCKET = os.environ["RECORDINGS_BUCKET"]
 ZOOM_API_KEY = os.environ["ZOOM_API_KEY"]
 ZOOM_API_SECRET = os.environ["ZOOM_API_SECRET"]
+ZOOM_ACCOUNT_ID = os.environ["ZOOM_ACCOUNT_ID"]
 
 
 s3 = boto3.resource("s3")
-zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET)
+zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET, ZOOM_ACCOUNT_ID)
 
 
 def handler(sf_input, context):

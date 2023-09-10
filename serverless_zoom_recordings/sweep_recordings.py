@@ -16,11 +16,12 @@ from .util.log_config import setup_logging
 DEPLOYMENT_STAGE = os.environ["DEPLOYMENT_STAGE"]
 ZOOM_API_KEY = os.environ["ZOOM_API_KEY"]
 ZOOM_API_SECRET = os.environ["ZOOM_API_SECRET"]
+ZOOM_ACCOUNT_ID = os.environ["ZOOM_ACCOUNT_ID"]
 INVOKE_STEPFUNCTION_ARN = os.environ["INVOKE_STEPFUNCTION_ARN"]
 
 lambda_client = boto3.client("lambda")
 stepfunction_client = boto3.client("stepfunctions")
-zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET)
+zoom_client = ZoomClient(ZOOM_API_KEY, ZOOM_API_SECRET, ZOOM_ACCOUNT_ID)
 
 
 def handler(event, context):
