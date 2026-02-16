@@ -52,3 +52,5 @@
 ### Manually ingest a recording from Zoom
 1. Retrieve the JSON of the Zoom webhook. (For example, go into the StepFunction execution and pull the JSON from there, then edit to needs.)
 1. Invoke the *invoke_stepfunction* endpoint: `sls invoke --aws-profile olf --stage prod --function invoke_stepfunction --path zoom_webhook.json`
+
+Demian — please delete this line in a pull request to test the CLA Action.
